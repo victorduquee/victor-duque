@@ -260,16 +260,7 @@ onMounted(() => {
     tick()
   }
 
-  if (!modelColEl.value) return
-
-  const observer = new IntersectionObserver((entries) => {
-    if (entries[0]?.isIntersecting) {
-      observer.disconnect()
-      init3D()
-    }
-  }, { rootMargin: '200px' })
-
-  observer.observe(modelColEl.value)
+  init3D()
 })
 
 onUnmounted(() => {
