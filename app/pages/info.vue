@@ -262,10 +262,12 @@ onMounted(() => {
     resize()
   })
 
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(loadModel)
+  // Empezar la carga en el siguiente frame para evitar el "pantallazo vacío"
+  // sin retrasar tanto la primera aparición del modelo.
+  if ('requestAnimationFrame' in window) {
+    requestAnimationFrame(loadModel)
   } else {
-    setTimeout(loadModel, 150)
+    loadModel()
   }
 
   tick()
