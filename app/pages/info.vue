@@ -325,7 +325,7 @@ onUnmounted(() => {
   background: transparent;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 220ms ease, visibility 220ms ease;
+  transition: opacity 500ms ease, visibility 500ms ease;
 }
 
 .info__canvas.is-visible {
