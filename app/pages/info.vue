@@ -2,7 +2,7 @@
   <div class="info layout">
     <!-- Left: scroll-controlled 3D model -->
     <aside class="info__model-col">
-      <canvas ref="canvasEl" class="info__canvas" />
+      <canvas ref="canvasEl" class="info__canvas" :class="{ 'is-visible': modelReady }" />
     </aside>
 
     <!-- Right: headline + content -->
@@ -96,6 +96,7 @@ useSeoMeta({
 })
 
 const canvasEl = ref(null)
+const modelReady = ref(false)
 const { $lenis } = useNuxtApp()
 
 let renderer, scene, camera, model
@@ -239,6 +240,13 @@ onMounted(() => {
         model.scale.setScalar(2.6 / maxAxis)
 
         scene.add(model)
+        modelReady.value = true
+        nextTick(() => {
+          if (canvasEl.value) {
+            canvasEl.value.style.visibility = 'visible'
+            canvasEl.value.style.opacity = '1'
+          }
+        })
       },
       undefined,
       () => {
@@ -314,7 +322,15 @@ onUnmounted(() => {
   border-radius: 8px;
   display: block;
   touch-action: none;
-  background: #20ff00;
+  background: transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.info__canvas.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* ── Right column ── */
