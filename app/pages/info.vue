@@ -175,25 +175,44 @@ onMounted(() => {
   const canvas = canvasEl.value
   if (!canvas) return
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const isSmallViewport = window.matchMedia('(max-width: 768px)').matches
+
   // Renderer
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: !prefersReducedMotion,
+    alpha: true,
+    powerPreference: 'high-performance',
+  })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, prefersReducedMotion || isSmallViewport ? 1.2 : 1.6))
   renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.NeutralToneMapping
-  renderer.toneMappingExposure = 1.0
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  renderer.toneMappingExposure = 0.9
 
   // Scene
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x20ff00)
 
-  // Environment HDRI
+  // HDRI: heavy asset, only load when the device can afford it.
   const pmrem = new THREE.PMREMGenerator(renderer)
   pmrem.compileEquirectangularShader()
-  new RGBELoader().load('/studio.hdr', (hdr) => {
-    scene.environment = pmrem.fromEquirectangular(hdr).texture
-    hdr.dispose()
+  if (!prefersReducedMotion && !isSmallViewport) {
+    new RGBELoader().load(
+      '/studio.hdr',
+      (hdr) => {
+        scene.environment = pmrem.fromEquirectangular(hdr).texture
+        hdr.dispose()
+        pmrem.dispose()
+      },
+      undefined,
+      () => {
+        pmrem.dispose()
+      }
+    )
+  } else {
     pmrem.dispose()
-  })
+  }
 
   // Camera
   const frustum = 1.2
@@ -201,25 +220,32 @@ onMounted(() => {
   camera.position.set(0, 0.5, 14)
   camera.lookAt(0, 0, 0)
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.5)
+  const ambient = new THREE.HemisphereLight(0xffffff, 0x101010, 1.2)
   scene.add(ambient)
 
-  // Load model
-  const loader = new GLTFLoader()
-  loader.load('/model.glb', (gltf) => {
-    model = gltf.scene
+  const loadModel = () => {
+    const loader = new GLTFLoader()
+    loader.load(
+      '/model.glb',
+      (gltf) => {
+        model = gltf.scene
 
-    // Centrar y escalar para que quepa bien
-    const box = new THREE.Box3().setFromObject(model)
-    const center = box.getCenter(new THREE.Vector3())
-    const size = box.getSize(new THREE.Vector3())
-    const maxAxis = Math.max(size.x, size.y, size.z)
-    model.position.sub(center)
-    model.position.y -= 0.4
-    model.scale.setScalar(2.6 / maxAxis)
+        const box = new THREE.Box3().setFromObject(model)
+        const center = box.getCenter(new THREE.Vector3())
+        const size = box.getSize(new THREE.Vector3())
+        const maxAxis = Math.max(size.x, size.y, size.z)
+        model.position.sub(center)
+        model.position.y -= 0.4
+        model.scale.setScalar(2.6 / maxAxis)
 
-    scene.add(model)
-  })
+        scene.add(model)
+      },
+      undefined,
+      () => {
+        console.warn('No se pudo cargar el modelo 3D.')
+      }
+    )
+  }
 
   canvas.addEventListener('pointerdown', onPointerDown)
   canvas.addEventListener('pointermove', onPointerMove)
@@ -235,6 +261,12 @@ onMounted(() => {
     $lenis?.resize()
     resize()
   })
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(loadModel)
+  } else {
+    setTimeout(loadModel, 150)
+  }
 
   tick()
 })
