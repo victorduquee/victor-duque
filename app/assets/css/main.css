@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-ThinItalic.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-ExtraLightItalic.ttf') format('truetype');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-ExtraBoldItalic.ttf') format('truetype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@/assets/fonts/Inter/Inter_24pt-BlackItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ─────────────────────────────────────────────
+   TIPOGRAFÍA — edita aquí para cambiar toda la web
+   ───────────────────────────────────────────── */
+
+/* Nav, filtros, Contact, esquinas */
+.t-ui {
+  font-size: 1.8rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* WORKS, PLAYGROUND */
+.t-label {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Menú overlay mobile */
+.t-menu {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: -0.8px;
+}
+
+/* Titular de Info */
+.t-headline {
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 400;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+/* Labels de sección: Bio, Disciplinas… */
+.t-section-label {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
+
+/* Cuerpo de texto */
+.t-body {
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.t-body-2 {
+  color: #9e9e9e;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Metadata pequeña: año, slide info */
+.t-meta {
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+/* Título de página de proyecto */
+.t-project-title {
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  padding-bottom: 12px;
+}
+
+/* Descripción de proyecto */
+.t-project-desc {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  color: #000;
+  font-family: 'Inter', sans-serif;
+  overscroll-behavior: none;
+  scrollbar-gutter: stable;
+}
+
+/* Sistema de layout principal */
+.layout {
+  @apply grid grid-cols-12 gap-4;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  height: 100vh;
+}
