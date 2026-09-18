@@ -118,13 +118,16 @@ watch(
   top: 0;
   left: 0;
   z-index: 1;
+  height: 100vh;
   pointer-events: none;
 }
 
 .layout__left {
-  @apply flex flex-col justify-between col-start-1 col-end-4;
+  @apply flex flex-col col-start-1 col-end-4;
+  justify-content: space-between;
   padding: 120px 0px 1.5rem 0px;
-  gap:40px;
+  min-height: 100vh;
+  height: 100%;
   pointer-events: all;
 }
 
@@ -188,11 +191,16 @@ video {
 
 
 @media (max-width: 900px) {
+  .layout {
+    gap: 0;
+  }
+
   .layout__left_wrapper {
     @apply col-start-1 col-end-13;
     position: relative;
     width: 100%;
     height: auto;
+    min-height: 0;
     padding: 0 !important;
   }
 
@@ -200,6 +208,10 @@ video {
     @apply col-start-1 col-end-13;
     margin-left: 0;
     padding-top: 120px;
+    justify-content: flex-start;
+    gap: 40px;
+    height: auto;
+    min-height: 0;
   }
 
   .layout__right {
