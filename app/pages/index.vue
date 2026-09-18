@@ -1,6 +1,6 @@
 <template>
   <div class="home-page" @mousemove="onMouseMove">
-    <div class="cursor-anchor" :style="{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }">
+    <div v-if="!isTouchDevice" class="cursor-anchor" :style="{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }">
       <div class="cursor-label t-ui" :class="{ 'is-visible': cursor.visible }">{{ lang === 'en' ? 'View' : 'Ver' }}</div>
     </div>
     <div class="slider-wrap">
@@ -11,7 +11,7 @@
           :to="`/projects/${project.slug}`"
           class="slide"
           :ref="el => { if (el) slides[i] = el.$el ?? el }"
-          @mouseenter="slidesReady && (cursor.visible = true)"
+          @mouseenter="slidesReady && !isTouchDevice && (cursor.visible = true)"
           @mouseleave="cursor.visible = false"
         >
           <div class="slide__img">
@@ -89,10 +89,29 @@ useSeoMeta({
 })
 
 const lang = useLang()
+const isTouchDevice = ref(false)
 const cursor = ref({ x: 0, y: 0, visible: false })
 const slidesReady = ref(hasPlayedIntro())
 
+onMounted(() => {
+  const mediaQuery = window.matchMedia('(hover: none)')
+  const updateTouchMode = () => {
+    isTouchDevice.value = mediaQuery.matches
+    if (isTouchDevice.value) {
+      cursor.value.visible = false
+    }
+  }
+
+  updateTouchMode()
+  mediaQuery.addEventListener?.('change', updateTouchMode)
+})
+
 function onMouseMove(e) {
+  if (isTouchDevice.value) {
+    cursor.value.visible = false
+    return
+  }
+
   cursor.value.x = e.clientX
   cursor.value.y = e.clientY
 }
@@ -352,7 +371,7 @@ onUnmounted(() => {
 
 .slide {
   width: 30vw;
-  color: #000;
+  color: var(--text);
   text-decoration: none;
   display: block;
 }
@@ -398,8 +417,9 @@ onUnmounted(() => {
 }
 
 .slide__year {
-  opacity: 0.5;
-  background: #ebebeb;
+  opacity: 0.9;
+  background: var(--panel);
+  color: var(--text);
   border-radius: 8px;
   padding: 0px 8px;
 }
@@ -423,7 +443,10 @@ onUnmounted(() => {
 }
 
 @media (hover: none) {
-  .cursor-anchor { display: none; }
+  .cursor-anchor,
+  .cursor-label {
+    display: none !important;
+  }
 }
 
 .cursor-label {
@@ -438,6 +461,12 @@ onUnmounted(() => {
   transition: scale 0.2s ease, opacity 0.2s ease;
   margin-top: 10px;
   margin-left: 10px;
+}
+
+:global(html[data-theme='dark']) .cursor-label,
+html[data-theme='dark'] .cursor-label {
+  background: #fff;
+  color: #000;
 }
 
 .cursor-label.is-visible {

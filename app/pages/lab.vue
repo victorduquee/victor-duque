@@ -1,60 +1,49 @@
 <template>
-  <section ref="rootEl" class="pg-root" :style="{ '--bg-tint': bgColor }" @mousemove="onMouseMove">
-    <div class="cursor-anchor" :style="{ transform: `translate(${cursorLabel.x}px, ${cursorLabel.y}px)` }">
+  <section ref="rootEl" class="pg-root" @mousemove="onMouseMove">
+    <div v-if="!isTouchDevice" class="cursor-anchor" :style="{ transform: `translate(${cursorLabel.x}px, ${cursorLabel.y}px)` }">
       <div class="cursor-label t-ui" :class="{ 'is-visible': cursorLabel.text }">{{ cursorLabel.text }}</div>
     </div>
     <div class="pg-columns" :style="{ '--col-count': colCount }" :class="{ 'is-ready': ready }">
       <div v-for="(col, ci) in activeColumns" :key="ci" class="pg-col">
         <div :ref="el => colInners[ci] = el" class="pg-col-inner">
-          <div
-            v-for="item in col.items"
-            :key="item.id"
-            class="pg-card"
-            :data-id="item.id"
-          >
-            <video
-              v-if="item.category === 'video'"
-              :src="item.src"
-              muted
-              loop
-              autoplay
-              playsinline
-              preload="auto"
-            />
-            <img
-              v-else
-              :src="item.cover ?? item.src"
-              :alt="item.title"
-            />
+          <div v-for="item in col.items" :key="item.id" class="pg-card" :data-id="item.id">
+            <video v-if="item.category === 'video'" :src="item.src" muted loop autoplay playsinline preload="auto" />
+            <img v-else :src="item.cover ?? item.src" :alt="item.title" />
           </div>
         </div>
       </div>
     </div>
 
     <Transition name="modal">
-      <div v-if="activeItem" class="modal-backdrop" @click.self="closeModal">
+      <div v-if="activeItem" class="modal-backdrop" @click="handleModalBackdropClick">
+        <div class="modal-controls">
+          <button class="modal-close" @click="closeModal" aria-label="Cerrar">
+            <span class="modal-close__icon">
+              <span class="modal-close__bar modal-close__bar--h"></span>
+              <span class="modal-close__bar modal-close__bar--v"></span>
+            </span>
+          </button>
+          <button class="modal-nav modal-nav--prev" type="button" aria-label="Anterior" @click.stop="navigateModal(-1)">
+            <span aria-hidden="true">←</span>
+          </button>
+          <button class="modal-nav modal-nav--next" type="button" aria-label="Siguiente" @click.stop="navigateModal(1)">
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <button v-if="!isTouchDevice && modalNavLabel" class="modal-cursor-label t-ui" :class="{ 'is-prev': modalNavLabel === 'Prev' }"
+          :style="{ transform: `translate(${cursorLabel.x}px, ${cursorLabel.y}px)` }"
+          @click="navigateModal(modalNavLabel === 'Prev' ? -1 : 1)" type="button">
+          {{ modalNavLabel }}
+        </button>
         <div class="modal-box">
-          <button class="modal-close" @click="closeModal">✕</button>
           <div class="modal-media">
-            <iframe
-              v-if="activeItem.category === 'herramienta'"
-              :src="activeItem.src"
-              frameborder="0"
-            />
-            <video
-              v-else-if="activeItem.category === 'video'"
-              :src="activeItem.src"
-              controls
-              autoplay
-              loop
-              playsinline
-              class="pg-modal__img"
-            />
+            <iframe v-if="activeItem.category === 'herramienta'" :src="activeItem.src" frameborder="0" />
+            <video v-else-if="activeItem.category === 'video'" :src="activeItem.src" autoplay loop playsinline muted
+              class="pg-modal__img" />
             <img v-else :src="activeItem.src" :alt="activeItem.title" />
           </div>
           <div class="modal-info">
-            <span class="modal-category">{{ activeItem.category }}</span>
-            <h2 class="modal-title">{{ activeItem.title }}</h2>
+            <h2 class="t-body">{{ activeItem.title }}</h2>
             <p class="modal-desc">{{ activeItem.desc }}</p>
           </div>
         </div>
@@ -75,15 +64,31 @@ useSeoMeta({
 import gsap from 'gsap'
 import { labItems } from '@/data/lab.js'
 
-const SPEEDS      = [1, 0.85, 1.1, 0.9]
-const FRICTION    = 0.90
+const SPEEDS = [1, 0.85, 1.1, 0.9]
+const FRICTION = 0.90
 const BREAKPOINTS = { sm: 560, md: 860 }
 
 const isMobile = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+const isTouchDevice = ref(false)
 
-const rootEl    = ref(null)
+onMounted(() => {
+  const mediaQuery = window.matchMedia('(hover: none)')
+  const updateTouchMode = () => {
+    isTouchDevice.value = mediaQuery.matches
+    if (isTouchDevice.value) {
+      cursorLabel.value.text = ''
+      modalNavLabel.value = ''
+      modalNavPos.value = { x: 0, y: 0 }
+    }
+  }
+
+  updateTouchMode()
+  mediaQuery.addEventListener?.('change', updateTouchMode)
+})
+
+const rootEl = ref(null)
 const colInners = ref([])
-const colCount  = ref(4)
+const colCount = ref(4)
 
 const activeColumns = computed(() =>
   Array.from({ length: colCount.value }, (_, ci) => ({
@@ -91,71 +96,106 @@ const activeColumns = computed(() =>
   }))
 )
 
-let yPositions      = []
-let velocities      = []
+let yPositions = []
+let velocities = []
 let originalHeights = []
-let rafId           = null
-let videoInterval   = null
-let resizeObserver  = null
-let isDragging      = false
-let dragMoved       = false
-let lastPointerY    = 0
+let rafId = null
+let videoInterval = null
+let resizeObserver = null
+let isDragging = false
+let dragMoved = false
+let lastPointerY = 0
 
 const activeItem = ref(null)
-const bgColor = ref('#fff')
 const cursorLabel = ref({ text: '', x: 0, y: 0 })
+const modalNavLabel = ref('')
+const modalNavPos = ref({ x: 0, y: 0 })
 const ready = ref(false)
 
 function onMouseMove(e) {
+  if (isTouchDevice.value) {
+    cursorLabel.value.text = ''
+    modalNavLabel.value = ''
+    modalNavPos.value = { x: 0, y: 0 }
+    return
+  }
+
   cursorLabel.value.x = e.clientX
   cursorLabel.value.y = e.clientY
-}
 
-function getDominantColor(img) {
-  try {
-    const canvas = document.createElement('canvas')
-    canvas.width = 16
-    canvas.height = 16
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(img, 0, 0, 16, 16)
-    const data = ctx.getImageData(0, 0, 16, 16).data
-    let r = 0, g = 0, b = 0, count = 0
-    for (let i = 0; i < data.length; i += 4) {
-      r += data[i]; g += data[i + 1]; b += data[i + 2]; count++
+  if (activeItem.value) {
+    const label = e.clientX < window.innerWidth / 2 ? 'Prev' : 'Next'
+    modalNavLabel.value = label
+    const offsetX = label === 'Prev' ? -20 : 20
+    modalNavPos.value = {
+      x: e.clientX + offsetX,
+      y: e.clientY + 18,
     }
-    // Mezclar con blanco al 80% para un tinte suave como fondo
-    const mix = 0.85
-    r = Math.round(r / count * (1 - mix) + 255 * mix)
-    g = Math.round(g / count * (1 - mix) + 255 * mix)
-    b = Math.round(b / count * (1 - mix) + 255 * mix)
-    return `rgb(${r},${g},${b})`
-  } catch {
-    return null
   }
 }
 
 function onCardEnter(e) {
+  if (isTouchDevice.value) return
+
   const card = e.currentTarget
-  const img = card.querySelector('img')
-  if (img?.complete) {
-    if (!img._dominantColor) img._dominantColor = getDominantColor(img)
-    if (img._dominantColor) bgColor.value = img._dominantColor
-  }
   const item = labItems.find(p => p.id === card.dataset.id)
   if (item) cursorLabel.value.text = item.title
 }
 
 function onCardLeave() {
-  bgColor.value = '#fff'
   cursorLabel.value.text = ''
 }
 
 function closeModal() {
   activeItem.value = null
+  modalNavLabel.value = ''
+  modalNavPos.value = { x: 0, y: 0 }
+}
+
+function handleModalBackdropClick(event) {
+  if (!activeItem.value) return
+
+  if (event.target.closest('.modal-close') || event.target.closest('.modal-cursor-label')) return
+
+  if (event.target.closest('.modal-box')) {
+    const direction = event.clientX < window.innerWidth / 2 ? -1 : 1
+    navigateModal(direction)
+    return
+  }
+
+  if (event.target !== event.currentTarget) return
+
+  const direction = event.clientX < window.innerWidth / 2 ? -1 : 1
+  navigateModal(direction)
+}
+
+function navigateModal(direction) {
+  if (!activeItem.value) return
+
+  const currentIndex = labItems.findIndex(item => item.id === activeItem.value.id)
+  const nextIndex = currentIndex === -1
+    ? 0
+    : (currentIndex + direction + labItems.length) % labItems.length
+
+  activeItem.value = labItems[nextIndex]
+  const label = direction < 0 ? 'Prev' : 'Next'
+  modalNavLabel.value = label
+  modalNavPos.value = {
+    x: cursorLabel.value.x + (label === 'Prev' ? -20 : 20),
+    y: cursorLabel.value.y + 18,
+  }
 }
 
 function onKeydown(e) {
   if (e.key === 'Escape') closeModal()
+  if (!activeItem.value) return
+
+  if (e.key === 'ArrowLeft') {
+    navigateModal(-1)
+  }
+  if (e.key === 'ArrowRight') {
+    navigateModal(1)
+  }
 }
 
 // Añade listeners de click directamente en el DOM (originales + clones)
@@ -168,7 +208,15 @@ function attachCardListeners(inner) {
     card._clickHandler = () => {
       if (dragMoved) return
       const item = labItems.find(p => p.id === card.dataset.id)
-      if (item) activeItem.value = item
+      if (item) {
+        activeItem.value = item
+        const label = typeof window !== 'undefined' && cursorLabel.value.x < window.innerWidth / 2 ? 'Prev' : 'Next'
+        modalNavLabel.value = label
+        modalNavPos.value = {
+          x: cursorLabel.value.x + (label === 'Prev' ? -20 : 20),
+          y: cursorLabel.value.y + 18,
+        }
+      }
     }
     card._enterHandler = onCardEnter
     card._leaveHandler = onCardLeave
@@ -213,7 +261,7 @@ function tick() {
 
     const h = originalHeights[i]
     while (current < -h) current += h
-    while (current > 0)  current -= h
+    while (current > 0) current -= h
 
     yPositions[i] = current
     gsap.set(inner, { y: current })
@@ -230,8 +278,8 @@ async function reinit() {
     const originalCount = activeColumns.value[i]?.items.length ?? 0
     while (inner.children.length > originalCount) inner.removeChild(inner.lastChild)
     gsap.set(inner, { y: 0 })
-    yPositions[i]  = 0
-    velocities[i]  = 0
+    yPositions[i] = 0
+    velocities[i] = 0
   })
 
   await Promise.all(
@@ -263,7 +311,7 @@ async function reinit() {
 
     // Listeners en todos: originales + clones
     attachCardListeners(inner)
-    inner.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => {}) })
+    inner.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => { }) })
   })
 }
 
@@ -275,14 +323,14 @@ function onWheel(e) {
 
 function onPointerDown(e) {
   if (activeItem.value) return
-  isDragging   = true
-  dragMoved    = false
+  isDragging = true
+  dragMoved = false
   lastPointerY = e.clientY ?? e.touches?.[0]?.clientY
 }
 
 function onPointerMove(e) {
   if (!isDragging) return
-  const y  = e.clientY ?? e.touches?.[0]?.clientY
+  const y = e.clientY ?? e.touches?.[0]?.clientY
   const dy = y - lastPointerY
   if (Math.abs(dy) > 4) dragMoved = true
   lastPointerY = y
@@ -319,7 +367,7 @@ async function recalcHeights() {
     // Normalizar posición actual a la nueva altura sin resetear
     let y = yPositions[i] ?? 0
     while (y < -newH) y += newH
-    while (y > 0)     y -= newH
+    while (y > 0) y -= newH
     yPositions[i] = y
     gsap.set(inner, { y })
 
@@ -334,7 +382,7 @@ async function recalcHeights() {
     }
 
     attachCardListeners(inner)
-    inner.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => {}) })
+    inner.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => { }) })
   })
 }
 
@@ -342,7 +390,8 @@ onMounted(async () => {
   if (isMobile) {
     colCount.value = getColCount(rootEl.value.offsetWidth)
     await nextTick()
-    rootEl.value.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => {}) })
+    attachCardListeners(rootEl.value)
+    rootEl.value.querySelectorAll('video').forEach(v => { v.muted = true; v.load(); v.play().catch(() => { }) })
     ready.value = true
 
     resizeObserver = new ResizeObserver(([entry]) => {
@@ -363,13 +412,13 @@ onMounted(async () => {
     rootEl.value.querySelectorAll('video').forEach(v => {
       v.muted = true
       if (v.readyState === 0) v.load()
-      if (v.paused) v.play().catch(() => {})
+      if (v.paused) v.play().catch(() => { })
     })
   }, 300)
 
   resizeObserver = new ResizeObserver(async ([entry]) => {
     const width = entry.contentRect.width
-    const next  = getColCount(width)
+    const next = getColCount(width)
     if (next !== colCount.value) {
       colCount.value = next
       await reinit()
@@ -380,14 +429,14 @@ onMounted(async () => {
   resizeObserver.observe(rootEl.value)
 
   const el = rootEl.value
-  el.addEventListener('wheel',      onWheel,       { passive: false })
-  el.addEventListener('mousedown',  onPointerDown)
+  el.addEventListener('wheel', onWheel, { passive: false })
+  el.addEventListener('mousedown', onPointerDown)
   el.addEventListener('touchstart', onPointerDown, { passive: true })
   window.addEventListener('mousemove', onPointerMove)
   window.addEventListener('touchmove', onPointerMove, { passive: true })
-  window.addEventListener('mouseup',   onPointerUp)
-  window.addEventListener('touchend',  onPointerUp)
-  window.addEventListener('keydown',   onKeydown)
+  window.addEventListener('mouseup', onPointerUp)
+  window.addEventListener('touchend', onPointerUp)
+  window.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
@@ -398,13 +447,13 @@ onUnmounted(() => {
   if (isMobile) return
   const el = rootEl.value
   if (!el) return
-  el.removeEventListener('wheel',      onWheel)
-  el.removeEventListener('mousedown',  onPointerDown)
+  el.removeEventListener('wheel', onWheel)
+  el.removeEventListener('mousedown', onPointerDown)
   el.removeEventListener('touchstart', onPointerDown)
   window.removeEventListener('mousemove', onPointerMove)
   window.removeEventListener('touchmove', onPointerMove)
-  window.removeEventListener('mouseup',   onPointerUp)
-  window.removeEventListener('touchend',  onPointerUp)
+  window.removeEventListener('mouseup', onPointerUp)
+  window.removeEventListener('touchend', onPointerUp)
 })
 </script>
 
@@ -415,8 +464,7 @@ onUnmounted(() => {
   height: 100vh;
   overflow: hidden;
   cursor: ns-resize;
-  background: var(--bg-tint, #fff);
-  transition: background 0.6s ease;
+  background: transparent;
 }
 
 @media (hover: none) {
@@ -436,7 +484,11 @@ onUnmounted(() => {
 }
 
 @media (hover: none) {
-  .cursor-anchor { display: none; }
+  .cursor-anchor,
+  .cursor-label,
+  .modal-cursor-label {
+    display: none !important;
+  }
 }
 
 .cursor-label {
@@ -451,6 +503,14 @@ onUnmounted(() => {
   transition: scale 0.2s ease, opacity 0.2s ease;
   margin-top: 10px;
   margin-left: 10px;
+}
+
+:global(html[data-theme='dark']) .cursor-label,
+:global(html[data-theme='dark']) .modal-cursor-label,
+html[data-theme='dark'] .cursor-label,
+html[data-theme='dark'] .modal-cursor-label {
+  background: #fff;
+  color: #000;
 }
 
 .cursor-label.is-visible {
@@ -525,69 +585,171 @@ onUnmounted(() => {
   border-radius: 8px;
   display: block;
   transition: scale 0.3s ease;
-  pointer-events: none; /* el click siempre lo recibe .pg-card, nunca el img */
+  pointer-events: none;
+  /* el click siempre lo recibe .pg-card, nunca el img */
+}
+
+video {
+  controls: false;
 }
 
 @media (hover: hover) {
+
   .pg-card:hover video,
   .pg-card:hover img {
     scale: 0.92;
   }
 }
 
+.modal-controls {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.85);
+  z-index: 80;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
   cursor: default;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .modal-box {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 860px;
-  max-height: 90vh;
-  background: #1a1a1a;
-  border-radius: 6px;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  width: 36px;
+  height: 36px;
+  z-index: 200;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: none;
-  color: #fff;
-  font-size: 1rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
+  border-radius: 4px;
   cursor: pointer;
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.15s ease, transform 0.15s ease;
+  padding: 0;
 }
 
+.modal-nav {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  z-index: 200;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+  padding: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.modal-nav span {
+  font-weight: 900;
+}
+
+.modal-nav:hover,
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--panel-hover);
+}
+
+.modal-nav:active,
+.modal-close:active {
+  transform: scale(0.97);
+}
+
+.modal-close__icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: block;
+  transform: rotate(45deg);
+}
+
+.modal-close__bar {
+  position: absolute;
+  background: var(--text);
+  border-radius: 1px;
+}
+
+.modal-close__bar--h {
+  width: 16px;
+  height: 4px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.modal-close__bar--v {
+  width: 4px;
+  height: 16px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.modal-cursor-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  background: #1c1c1c;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  transform-origin: top left;
+  margin-top: 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
 }
 
 .modal-media {
   width: 100%;
   aspect-ratio: 1 / 1;
+  max-height: calc(100vh - 20rem);
   overflow: hidden;
-  background: #111;
+  background: var(--bg-alt);
+  border-radius: 6px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-media iframe {
@@ -605,27 +767,26 @@ onUnmounted(() => {
 }
 
 .modal-info {
-  padding: 1.25rem 1.5rem 1.5rem;
+  padding: 1rem 0rem 0rem 0rem;
   flex-shrink: 0;
+  color: inherit;
+}
+
+.modal-title {
+  color: inherit;
 }
 
 .modal-category {
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #888;
-}
-
-.modal-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0.25rem 0 0.5rem;
+  color: var(--text-soft);
 }
 
 .modal-desc {
   font-size: 0.9rem;
-  color: #aaa;
+  color: inherit;
+  opacity: 0.8;
   line-height: 1.6;
   margin: 0;
 }

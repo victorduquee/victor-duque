@@ -58,12 +58,29 @@
         </div>
       </Transition>
 
-      <!-- Botón idioma — abajo derecha -->
-      <button
-        class="lang-btn t-ui"
-        v-show="cornersVisible"
-        @click="lang = lang === 'es' ? 'en' : 'es'"
-      >{{ lang === 'es' ? 'EN' : 'ES' }}</button>
+      <!-- Botón idioma y tema — abajo derecha -->
+      <div class="header-controls" v-show="cornersVisible">
+        <button
+          class="lang-btn t-ui"
+          @click="lang = lang === 'es' ? 'en' : 'es'"
+        >{{ lang === 'es' ? 'EN' : 'ES' }}</button>
+
+        <button
+          class="theme-switch"
+          :class="{ 'is-dark': isDarkMode }"
+          type="button"
+          aria-label="Cambiar modo de color"
+          :aria-pressed="isDarkMode"
+          @click="toggleColorMode"
+        >
+          <span class="theme-switch__track">
+            <span class="theme-switch__thumb">
+              <span class="theme-switch__icon theme-switch__icon--sun">☀</span>
+              <span class="theme-switch__icon theme-switch__icon--moon">☾</span>
+            </span>
+          </span>
+        </button>
+      </div>
 
       <!-- Overlay transición -->
       <div ref="overlay" class="overlay" />
@@ -86,16 +103,27 @@ const showIntro = ref(false)
 const overlay = ref(null)
 const route = useRoute()
 const cornersVisible = useState('cornersVisible', () => false)
+const isDarkMode = useState('theme-mode', () => false)
 const mobileMenuOpen = ref(false)
 const contactOpen = ref(false)
 const lang = useLang()
 const t = computed(() => translations[lang.value].nav)
 
 watch(() => route.path, () => { mobileMenuOpen.value = false; contactOpen.value = false })
+watch(isDarkMode, (value) => {
+  if (import.meta.client) {
+    document.documentElement.setAttribute('data-theme', value ? 'dark' : 'light')
+    localStorage.setItem('theme-mode', value ? 'dark' : 'light')
+  }
+}, { immediate: true })
 
 const isWorksActive = computed(() =>
-  route.path === '/'
+  route.path === '/' || route.path.startsWith('/projects/')
 )
+
+function toggleColorMode() {
+  isDarkMode.value = !isDarkMode.value
+}
 
 useHead({
   link: [
@@ -116,6 +144,13 @@ useHead({
 })
 
 onMounted(() => {
+  if (import.meta.client) {
+    const savedTheme = localStorage.getItem('theme-mode')
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      isDarkMode.value = savedTheme === 'dark'
+    }
+  }
+
   if (route.path !== '/') {
     window.__introPlayed = true
     cornersVisible.value = true
@@ -185,14 +220,14 @@ function onEnter(el, done) {
 }
 
 .header-name-box {
-  background: rgba(235, 235, 235, 0.7);
+  background: var(--panel);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 4px;
   display: flex;
   align-items: center;
   padding: 0 0.6rem;
-  color: #000;
+  color: var(--text);
   text-decoration: none;
   white-space: nowrap;
   height: 100%
@@ -200,7 +235,7 @@ function onEnter(el, done) {
 
 
 .header-nav__item {
-  background: rgba(235, 235, 235, 0.7);
+  background: var(--panel);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 4px;
@@ -208,41 +243,95 @@ function onEnter(el, done) {
   align-items: center;
   height: 100%;
   padding: 0 0.6rem;
-  color: #000;
+  color: var(--text);
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.15s ease;
 }
 
 .header-nav__item:hover {
-  background: rgba(216, 216, 216, 0.8);
+  background: var(--panel-hover);
 }
 
 .header-nav__item.is-active,
 .header-nav__item.router-link-exact-active {
   background: #20ff00;
+  color: #000;
 }
 
-/* Botón idioma */
-.lang-btn {
+/* Botones de la esquina inferior derecha */
+.header-controls {
   position: fixed;
-  bottom: 1.5rem;
   right: 1.5rem;
+  bottom: 1.5rem;
   z-index: 90;
-  background: rgba(235, 235, 235, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lang-btn,
+.theme-switch {
+  background: var(--panel);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: none;
   border-radius: 4px;
   height: 36px;
-  padding: 0 0.6rem;
   cursor: pointer;
-  color: #000;
+  color: var(--text);
   transition: background 0.15s ease;
 }
 
-.lang-btn:hover {
-  background: rgba(216, 216, 216, 0.8);
+.lang-btn {
+  padding: 0 0.6rem;
+}
+
+.lang-btn:hover,
+.theme-switch:hover {
+  background: var(--panel-hover);
+}
+
+.theme-switch {
+  width: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-switch__track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+}
+
+.theme-switch__thumb {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  border-radius: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(0);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
+}
+
+.theme-switch.is-dark .theme-switch__thumb {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+.theme-switch__icon {
+  display: none;
 }
 
 
@@ -310,7 +399,7 @@ function onEnter(el, done) {
   height: 36px;
   right: 1.5rem;
   z-index: 200;
-  background: rgba(235, 235, 235, 0.7);
+  background: var(--panel);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: none;
@@ -321,7 +410,7 @@ function onEnter(el, done) {
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
-  color: #000;
+  color: var(--text);
 }
 
 .mobile-menu-btn__icon {
@@ -338,7 +427,7 @@ function onEnter(el, done) {
 
 .mobile-menu-btn__bar {
   position: absolute;
-  background: #000;
+  background: var(--text);
   border-radius: 1px;
 }
 
@@ -363,7 +452,7 @@ function onEnter(el, done) {
   position: fixed;
   inset: 0;
   z-index: 150;
-  background: #fff;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -376,7 +465,7 @@ function onEnter(el, done) {
 }
 
 .mobile-menu__item {
-  color: #000;
+  color: var(--text);
   text-decoration: none;
   font-size: clamp(3rem, 14vw, 6rem);
   font-weight: 800;
@@ -390,6 +479,7 @@ function onEnter(el, done) {
 
 .mobile-menu__item.is-active {
   background: #20ff00;
+  color: #000;
   border-radius: 8px;
   padding: 0 0.1em;
 }
@@ -402,7 +492,8 @@ function onEnter(el, done) {
 }
 
 .mobile-menu__link {
-  background: #ebebeb;
+  background: var(--panel-strong);
+  color: var(--text);
   border-radius: 4px;
   font-family: 'Inter', sans-serif;
   font-size: 1.8rem;
@@ -491,7 +582,7 @@ function onEnter(el, done) {
 .overlay {
   position: fixed;
   inset: 0;
-  background: #eee;
+  background: var(--overlay);
   z-index: 50;
   pointer-events: none;
   clip-path: inset(100% 0 0 0);

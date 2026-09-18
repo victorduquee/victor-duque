@@ -149,7 +149,7 @@ watch(
   grid-template-columns: 1fr 1fr;
   align-items: start;
   padding: 12px;
-  background-color: rgba(235, 235, 235, 0.7);
+  background: var(--panel);
   border-radius: 8px;
 }
 
