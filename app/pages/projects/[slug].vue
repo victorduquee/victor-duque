@@ -117,6 +117,7 @@ watch(
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -130,6 +131,8 @@ watch(
 .layout__right {
   @apply col-start-5 col-end-13;
   min-height: 100vh;
+  position: relative;
+  z-index: 2;
 }
 
 
