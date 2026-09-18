@@ -88,12 +88,28 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
-onMounted(() => {
+const resetProjectScroll = () => {
   const { $lenis } = useNuxtApp()
+
+  window.scrollTo(0, 0)
+  $lenis?.scrollTo(0, { immediate: true })
+
   nextTick(() => {
     $lenis?.resize()
   })
+}
+
+onMounted(() => {
+  resetProjectScroll()
 })
+
+watch(
+  () => route.fullPath,
+  () => {
+    resetProjectScroll()
+  },
+  { flush: 'post' }
+)
 </script>
 
 <style scoped>
