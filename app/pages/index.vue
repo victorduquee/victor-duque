@@ -116,6 +116,7 @@ const sortedProjects = [...projects].sort((a, b) => parseInt(b.year) - parseInt(
 const loopedProjects = computed(() =>
   isMobile ? sortedProjects : [...sortedProjects, ...sortedProjects, ...sortedProjects]
 )
+const centeredLoopOffset = computed(() => projects.length)
 
 cornersVisible.value = hasPlayedIntro()
 
@@ -137,10 +138,23 @@ function initY() {
   y = targetY = -loopH
 }
 
+function centerOnProject() {
+  if (!loopH || !slider.value) return
+
+  const targetSlide = slides.value[centeredLoopOffset.value]
+  if (!targetSlide) return
+
+  const desiredY = window.innerHeight / 2 - targetSlide.offsetTop - targetSlide.offsetHeight / 2
+
+  y = targetY = desiredY
+  wrapY()
+  gsap.set(slider.value, { y })
+}
+
 function wrapY() {
   if (!loopH) return
   while (y <= -2 * loopH) { y += loopH; targetY += loopH }
-  while (y > -loopH) { y -= loopH; targetY -= loopH }
+  while (y > 0) { y -= loopH; targetY -= loopH }
 }
 
 const isMobile = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
@@ -157,6 +171,10 @@ const onWheel = (e) => {
   targetY -= e.deltaY
 }
 
+const onResize = () => {
+  calcLoopH()
+  centerOnProject()
+}
 
 function playIntro() {
   const all = slides.value.filter(Boolean)
@@ -261,6 +279,7 @@ onMounted(() => {
     if (!isMobile) {
       calcLoopH()
       initY()
+      centerOnProject()
       animate()
     }
     playIntro()
@@ -268,7 +287,7 @@ onMounted(() => {
 
   if (!isMobile) {
     window.addEventListener('wheel', onWheel, { passive: true })
-    window.addEventListener('resize', calcLoopH)
+    window.addEventListener('resize', onResize)
   }
 })
 
@@ -276,7 +295,7 @@ onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
   if (!isMobile) {
     window.removeEventListener('wheel', onWheel)
-    window.removeEventListener('resize', calcLoopH)
+    window.removeEventListener('resize', onResize)
   }
   cornersVisible.value = true
 })
