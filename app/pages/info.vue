@@ -171,13 +171,17 @@ onMounted(() => {
   const init3D = async () => {
     if (!canvasEl.value || renderer) return
 
-    const [threeModule, gltfModule] = await Promise.all([
+    const [threeModule, gltfModule, dracoModule, ktx2Module] = await Promise.all([
       import('three'),
       import('three/examples/jsm/loaders/GLTFLoader.js'),
+      import('three/examples/jsm/loaders/DRACOLoader.js'),
+      import('three/examples/jsm/loaders/KTX2Loader.js'),
     ])
 
     THREE = threeModule
     GLTFLoader = gltfModule.GLTFLoader
+    const DracoLoader = dracoModule.DRACOLoader
+    const KTX2Loader = ktx2Module.KTX2Loader
 
     const canvas = canvasEl.value
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -207,6 +211,16 @@ onMounted(() => {
 
     const loadModel = () => {
       const loader = new GLTFLoader()
+
+      const dracoLoader = new DracoLoader()
+      dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/libs/draco/')
+      loader.setDRACOLoader(dracoLoader)
+
+      const ktx2Loader = new KTX2Loader()
+      ktx2Loader.setTranscoderPath('https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/libs/basis/')
+      ktx2Loader.detectSupport(renderer)
+      loader.setKTX2Loader(ktx2Loader)
+
       loader.load(
         '/model.glb',
         (gltf) => {
