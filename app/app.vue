@@ -97,6 +97,24 @@ const isWorksActive = computed(() =>
   route.path === '/'
 )
 
+useHead({
+  link: [
+    { rel: 'preload', href: '/model.glb', as: 'fetch', crossorigin: 'anonymous' },
+    {
+      rel: 'preload',
+      href: 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/libs/draco/draco_wasm_wrapper.js',
+      as: 'script',
+      crossorigin: 'anonymous',
+    },
+    {
+      rel: 'preload',
+      href: 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/libs/draco/draco_decoder.wasm',
+      as: 'fetch',
+      crossorigin: 'anonymous',
+    },
+  ],
+})
+
 onMounted(() => {
   if (route.path !== '/') {
     window.__introPlayed = true
