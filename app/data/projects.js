@@ -1,5 +1,27 @@
 export const projects = [
     {
+        slug: 'wonderfood',
+        year: '2023',
+        team: 'Estudio Branding waka',
+        title: 'Wonderfood',
+        tags: ['Identidad visual', 'Ilustración', "UX/UI"],
+        description: 'Wonderfood es un delivery de menús veganos que rompe con la competencia racional y sin gracia del sector apostando por una marca consciente y disfrutona, con una identidad retrofuturista, cósmica y psicodélica que redefine el veganismo como algo divertido y atractivo.',
+        descriptionEn: 'Wonderfood is a vegan meal delivery service that breaks with the rational and joyless competition in the sector by betting on a conscious and fun brand, with a retrofuturistic, cosmic and psychedelic identity that redefines veganism as something enjoyable and attractive.',
+        cover: '/thumbnails/wonderfood.jpg',
+        images: [
+            { src: '/projects/wonderfood/1.mp4', size: 'full', type: 'video' },
+            { src: '/projects/wonderfood/2.webp', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 1' },
+            { src: '/projects/wonderfood/3.webp', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 2' },
+            { src: '/projects/wonderfood/4.mp4', size: 'full', type: 'video' },
+            { src: '/projects/wonderfood/5.mp4', size: 'full', type: 'video' },
+            { src: '/projects/wonderfood/6.jpg', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 3' },
+            { src: '/projects/wonderfood/7.webp', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 4' },
+            { src: '/projects/wonderfood/8.mp4', size: 'full', type: 'video' },
+            { src: '/projects/wonderfood/9.webp', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 5' },
+            { src: '/projects/wonderfood/10.webp', size: 'half', type: 'image', alt: 'Wonderfood — Imagen 6' },
+        ]
+    },
+    {
         slug: 'isd',
         year: '2024',
         team: 'Prodigioso Volcán',
