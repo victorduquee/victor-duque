@@ -1,5 +1,28 @@
 export const projects = [
     {
+        slug: 'ecovidrio',
+        year: '2024',
+        team: 'Prodigioso Volcán',
+        title: 'Ecovidrio',
+        tags: ['Identidad visual'],
+        description: 'Trabajé en el rediseño estratégico de Ecovidrio para alinear la marca con la economía circular actual, manteniendo la identidad que ha construido desde 1998. Al simplificar su icónico logo del “iglú” e introducir un sistema visual vibrante y dinámico, la nueva identidad proyecta liderazgo, cercanía y optimismo para esta nueva etapa.',
+        descriptionEn: 'I worked on the strategic redesign of Ecovidrio to align the brand with the modern circular economy while keeping the identity it has built since 1998. By simplifying its iconic “igloo” logo and introducing a vibrant, dynamic visual system, the new identity projects leadership, closeness and optimism for this new phase.',
+        cover: '/thumbnails/ecovidrio.jpg',
+        images: [
+            { src: '/projects/ecovidrio/01.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/02.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/03.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 2' },
+            { src: '/projects/ecovidrio/04.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 1' },
+            { src: '/projects/ecovidrio/05.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/06.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/07.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/08.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/09.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 2' },
+            { src: '/projects/ecovidrio/10.mp4', size: 'full', type: 'video' },
+            { src: '/projects/ecovidrio/11.mp4', size: 'full', type: 'video' },
+        ]
+    },
+    {
         slug: 'wonderfood',
         year: '2023',
         team: 'Estudio Branding waka',
