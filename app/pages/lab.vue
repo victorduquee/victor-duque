@@ -58,7 +58,7 @@ useSeoMeta({
   description: 'Exploraciones visuales, ilustraciones y experimentos de diseño de Víctor Duque.',
   ogTitle: 'Lab — Víctor Duque',
   ogDescription: 'Exploraciones visuales, ilustraciones y experimentos de diseño de Víctor Duque.',
-  ogImage: '/thumbnails/ciuden.jpg',
+  ogImage: '/thumbnails/rebeland.jpg',
   twitterCard: 'summary_large_image',
 })
 import gsap from 'gsap'

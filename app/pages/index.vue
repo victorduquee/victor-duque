@@ -84,7 +84,7 @@ useSeoMeta({
   description: 'Portfolio de Víctor Duque, diseñador gráfico especializado en identidad visual y branding.',
   ogTitle: 'Víctor Duque — Diseñador gráfico',
   ogDescription: 'Portfolio de Víctor Duque, diseñador gráfico especializado en identidad visual y branding.',
-  ogImage: '/thumbnails/ciuden.jpg',
+  ogImage: '/thumbnails/rebeland.jpg',
   twitterCard: 'summary_large_image',
 })
 

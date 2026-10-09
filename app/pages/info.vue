@@ -84,7 +84,7 @@ useSeoMeta({
   description: 'Diseñador gráfico y creativo visual con base en Barcelona, especializado en identidad visual y branding.',
   ogTitle: 'Info — Víctor Duque',
   ogDescription: 'Diseñador gráfico y creativo visual con base en Barcelona, especializado en identidad visual y branding.',
-  ogImage: '/thumbnails/ciuden.jpg',
+  ogImage: '/thumbnails/rebeland.jpg',
   twitterCard: 'summary_large_image',
 })
 

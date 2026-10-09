@@ -5,9 +5,9 @@
       v-if="downloadUrl"
       class="model-recording__download"
       :href="downloadUrl"
-      download="about-model-turn.mp4"
+      download="about-model-turn.webm"
     >
-      Descargar MP4
+      Descargar WebM
     </a>
     <p v-if="recordingStatus" class="model-recording__status">{{ recordingStatus }}</p>
   </main>
@@ -67,7 +67,7 @@ onMounted(async () => {
     alpha: false,
     powerPreference: 'high-performance',
   })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.NoToneMapping
   renderer.setClearColor(0xffffff, 1)
@@ -105,47 +105,22 @@ onMounted(async () => {
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
       ? 'video/webm;codecs=vp9'
       : 'video/webm'
-    mediaRecorder = new MediaRecorder(stream, { mimeType })
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType,
+      videoBitsPerSecond: 20_000_000,
+    })
     recordedChunks = []
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) recordedChunks.push(event.data)
     }
     mediaRecorder.onstop = async () => {
-      recordingStatus.value = 'Convirtiendo a MP4…'
-      try {
-        const [{ FFmpeg }, { fetchFile, toBlobURL }] = await Promise.all([
-          import('@ffmpeg/ffmpeg'),
-          import('@ffmpeg/util'),
-        ])
-        const ffmpeg = new FFmpeg()
-        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd'
-        await ffmpeg.load({
-          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        })
-        await ffmpeg.writeFile('input.webm', await fetchFile(new Blob(recordedChunks, { type: mimeType })))
-        await ffmpeg.exec([
-          '-i', 'input.webm',
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
-          '-movflags', '+faststart',
-          'output.mp4',
-        ])
-        const data = await ffmpeg.readFile('output.mp4')
-        const blob = new Blob([data], { type: 'video/mp4' })
-        downloadUrl.value = URL.createObjectURL(blob)
-        recordingStatus.value = 'MP4 listo. Pulsa “Descargar MP4” si la descarga no empieza automáticamente.'
-        const link = document.createElement('a')
-        link.href = downloadUrl.value
-        link.download = 'about-model-turn.mp4'
-        link.click()
-        await ffmpeg.deleteFile('input.webm')
-        await ffmpeg.deleteFile('output.mp4')
-        ffmpeg.terminate()
-      } catch (error) {
-        recordingStatus.value = 'No se pudo generar el MP4. Revisa la consola para más detalles.'
-        console.error('No se pudo convertir la grabación a MP4.', error)
-      }
+      const blob = new Blob(recordedChunks, { type: mimeType })
+      downloadUrl.value = URL.createObjectURL(blob)
+      recordingStatus.value = 'WebM listo. Pulsa “Descargar WebM” si la descarga no empieza automáticamente.'
+      const link = document.createElement('a')
+      link.href = downloadUrl.value
+      link.download = 'about-model-turn.webm'
+      link.click()
     }
     mediaRecorder.start()
 
