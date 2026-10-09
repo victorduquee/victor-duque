@@ -1,5 +1,24 @@
 export const projects = [
     {
+        slug: 'itj',
+        year: '2024',
+        team: 'Prodigioso Volcán',
+        title: 'Instituto para la Transición Justa',
+        tags: ['Identidad visual'],
+        description: 'Rediseñamos la identidad visual del Instituto para la Transición Justa con un diseño que aporta una mayor expresividad y recursos a una marca flexible, que a menudo tiene que convivir con logotipos del Ministerio y de otras entidades.',
+        descriptionEn: 'We have redesigned the visual identity of the Instituto para la Transición Justa with a design that brings greater expressiveness and more resources to a flexible brand, one that often has to coexist with the logos of the Ministry and other entities.',
+        cover: '/thumbnails/itj.png',
+        images: [
+            { src: '/projects/itj/01.jpg', size: 'full', type: 'image', alt: 'ITJ — Imagen 1' },
+            { src: '/projects/itj/02.png', size: 'full', type: 'image', alt: 'ITJ — Imagen 2' },
+            { src: '/projects/itj/03.jpg', size: 'full', type: 'image', alt: 'ITJ — Imagen 3' },
+            { src: '/projects/itj/04.mp4', size: 'full', type: 'video' },
+            { src: '/projects/itj/05.jpg', size: 'full', type: 'image', alt: 'ITJ — Imagen 4' },
+            { src: '/projects/itj/06.png', size: 'full', type: 'image', alt: 'ITJ — Imagen 5' },
+            { src: '/projects/itj/07.jpg', size: 'full', type: 'image', alt: 'ITJ — Imagen 6' },
+        ]
+    },
+    {
         slug: 'ecovidrio',
         year: '2024',
         team: 'Prodigioso Volcán',
@@ -11,13 +30,13 @@ export const projects = [
         images: [
             { src: '/projects/ecovidrio/01.mp4', size: 'full', type: 'video' },
             { src: '/projects/ecovidrio/02.mp4', size: 'full', type: 'video' },
-            { src: '/projects/ecovidrio/03.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 2' },
-            { src: '/projects/ecovidrio/04.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 1' },
+            { src: '/projects/ecovidrio/03.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 1' },
+            { src: '/projects/ecovidrio/04.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 2' },
             { src: '/projects/ecovidrio/05.mp4', size: 'full', type: 'video' },
             { src: '/projects/ecovidrio/06.mp4', size: 'full', type: 'video' },
             { src: '/projects/ecovidrio/07.mp4', size: 'full', type: 'video' },
             { src: '/projects/ecovidrio/08.mp4', size: 'full', type: 'video' },
-            { src: '/projects/ecovidrio/09.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 2' },
+            { src: '/projects/ecovidrio/09.jpg', size: 'full', type: 'image', alt: 'Ecovidrio — Imagen 3' },
             { src: '/projects/ecovidrio/10.mp4', size: 'full', type: 'video' },
             { src: '/projects/ecovidrio/11.mp4', size: 'full', type: 'video' },
         ]
